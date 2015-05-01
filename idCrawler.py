@@ -2,7 +2,7 @@ from twython import Twython
 import re
 import json
 import numpy as np
-import pymongo
+#import pymongo
 
 def getTweets(screen_name):
 	consumer_key = "MLGdNZCfmzGthHTAyJU4KFvbU"
@@ -22,7 +22,7 @@ def getTweets(screen_name):
 	return totalTweets
 
 
-collection = pymongo.MongoClient().idea.BDP_tweets
+#collection = pymongo.MongoClient().idea.BDP_tweets
 candidates = []  #fill in the ids you need to crawl
 #candidates = json.load(open("BDP_candidates.json"))
 
@@ -32,5 +32,5 @@ for screen_name in candidates:
 	tweets += getTweets(screen_name)
 	print(screen_name + "is done!")
 
-collection.insert(tweets)
+#collection.insert(tweets)
 print("Insertion complete")
