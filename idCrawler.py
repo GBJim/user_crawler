@@ -51,6 +51,8 @@ def getTweets(screen_name=None, user_id=None, num = None):
 		return totalTweets[:num]
 
 def langDetect(tweets ,lang, threshold, method = "simple"):
+	if len(tweets) == 0:
+		return False
 	langCount = 0
 	if method == "simple":
 		for tweet in tweets:
@@ -68,10 +70,9 @@ def langDetect(tweets ,lang, threshold, method = "simple"):
 				pass
 	langRatio = langCount / len(tweets)
 	print(langRatio)
-	if len(tweets) == 0:
-		return False
-	else:
-		return langRatio > threshold
+
+
+	return langRatio > threshold
 
 
 
