@@ -28,8 +28,6 @@ def getTweets(screen_name=None, user_id=None, num = None):
 			totalTweets += tweets[1:]
 	return totalTweets
 
-
-
 	totalTweets = []
 
 	if num == None:
@@ -52,20 +50,30 @@ def getTweets(screen_name=None, user_id=None, num = None):
 				totalTweets += tweets[1:]
 		return totalTweets[:num]
 
-def langDetect(tweets ,lang, threshold):
+def langDetect(tweets ,lang, threshold, method = "simple"):
 	langCount = 0
-	for tweet in tweets:
+	if method == "simple":
 		try:
-			if lang == detect(tweet["text"]):
+			if lang == tweet["lang"]:
 				langCount += 1
 		except LangDetectException:
 			pass
+	else:
+		for tweet in tweets:
+			try:
+				if lang == detect(tweet["text"]):
+					langCount += 1
+			except LangDetectException:
+				pass
 	langRatio = langCount / len(tweets)
 	print(langRatio)
 	if len(tweets) == 0:
 		return False
 	else:
 		return langRatio > threshold
+
+
+
 
 
 def userLangDetect(screen_name=None, user_id=None, lang="en", threshold=0.9, num = 100):
