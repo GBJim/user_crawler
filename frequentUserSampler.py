@@ -69,7 +69,7 @@ for user_id in randomUsers[i:]:
 		print("validated {}".format(times))
 		print("trial {}".format(i))
 		if userLangDetect(user_id = user_id, threshold = 0.9):
-			tweets += getTweets(user_id)
+			tweets += getTweets(user_id = user_id)
 			times += 1
 	except  TwythonAuthError:
 		print("Bad Authentication")
