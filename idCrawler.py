@@ -53,11 +53,12 @@ def getTweets(screen_name=None, user_id=None, num = None):
 def langDetect(tweets ,lang, threshold, method = "simple"):
 	langCount = 0
 	if method == "simple":
-		try:
-			if lang == tweet["lang"]:
-				langCount += 1
-		except LangDetectException:
-			pass
+		for tweet in tweets:
+			try:
+				if lang == tweet["lang"]:
+					langCount += 1
+			except LangDetectException:
+				pass
 	else:
 		for tweet in tweets:
 			try:
