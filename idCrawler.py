@@ -2,16 +2,23 @@ from twython import Twython
 import re
 import json
 import numpy as np
+from langdetect import detect
+from langdetect.detector import LangDetectException
+
+
 #import pymongo
 
-def getTweets(screen_name):
+def getTweets(screen_name=None, user_id=None, num = None):
 	consumer_key = "MLGdNZCfmzGthHTAyJU4KFvbU"
 	consumer_secret ="Tfp7DIZcJLbnS8BR5CWQmZklrhsbtc3fMfssKPT4SZoYsPiQKw"
 	access_token ="2383540880-s2C8xPgA4ITF7QnLRFnHK1es2UEbmW8qHQ87sX5"
 	access_token_secret ="kLYgBTPeslLgaFugCx0PoiBpPIKnyCBEVfqqJCkjsSKpP"
 	twitter = Twython(consumer_key, consumer_secret,access_token,access_token_secret )
 
-	tweets = twitter.get_user_timeline(screen_name = screen_name, count = 200, trim_user = False, include_rts = True  )
+	if screen_name == None:
+		tweets = twitter.get_user_timeline(user_id = user_id, count = 200, trim_user = False, include_rts = True  )
+	else:
+		tweets = twitter.get_user_timeline(screen_name = screen_name, count = 200, trim_user = False, include_rts = True  )
 
 	totalTweets = tweets
 	while len(tweets) >= 2:
@@ -23,21 +30,53 @@ def getTweets(screen_name):
 
 
 
-'''
-#collection = pymongo.MongoClient().idea.BDP_tweets
-candidates = ["nyse", "DowJones", "BSEIndia"]  #fill in the ids you need to crawl
-#candidates = json.load(open("BDP_candidates.json"))
+	totalTweets = []
 
-tweets = []
+	if num == None:
+		tweets = twitter.get_user_timeline(screen_name = screen_name, count = 200, trim_user = True, include_rts = False  )
+		while len(tweets) >= 2:
+			max_id = tweets[-1]["id"]
+			tweets = twitter.get_user_timeline(screen_name = screen_name, max_id = max_id, count = 200, trim_user = True, include_rts = False)
 
-for screen_name in candidates:
-	tweets += getTweets(screen_name)
-	print(screen_name + "is done!")
+			if len(tweets) > 1:
+				totalTweets += tweets[1:]
+		return totalTweets
+	else:
+		count = num if num < 200 else 200
+		tweets = twitter.get_user_timeline(screen_name = screen_name, count = count, trim_user = True, include_rts = False  )
+		while len(tweets) >= 2 and len(tweets) < num:
+			max_id = tweets[-1]["id"]
+			tweets = twitter.get_user_timeline(screen_name = screen_name, max_id = max_id, count = 200, trim_user = True, include_rts = False)
 
-w = open("Ashcok.json", "w")
-json.dump(tweets, w)
-w.close()
+			if len(tweets) > 1:
+				totalTweets += tweets[1:]
+		return totalTweets[:num]
 
-#collection.insert(tweets)
-print("Insertion complete")
-'''
+def langDetect(tweets ,lang, threshold):
+	langCount = 0
+	for tweet in tweets:
+		try:
+			if lang == detect(tweet["text"]):
+				langCount += 1
+		except LangDetectException:
+			pass
+	langRatio = langCount / len(tweets)
+	print(langRatio)
+	if len(tweets) == 0:
+		return False
+	else:
+		return langRatio > threshold
+
+
+def userLangDetect(screen_name=None, user_id=None, lang="en", threshold=0.9, num = 100):
+	if screen_name == None:
+		tweets = getTweets(screen_name=None,user_id=user_id)
+	else:
+		tweets = getTweets(screen_name)
+	return langDetect(tweets,lang,threshold)
+
+
+
+
+if __name__ == '__main__':
+	print(userLangDetect(user_id=5402612))
