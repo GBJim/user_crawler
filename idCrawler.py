@@ -1,10 +1,16 @@
 from twython import Twython
+from  twython import TwythonRateLimitError
 import re
 import json
 import numpy as np
 from langdetect import detect
 from langdetect.detector import LangDetectException
-
+from time import sleep
+from twython import Twython
+from twython import TwythonAuthError
+from twython import TwythonRateLimitError
+from twython import TwythonError
+from warnings import warn
 
 #import pymongo
 
@@ -15,15 +21,33 @@ def getTweets(screen_name=None, user_id=None, num = None):
 	access_token_secret ="kLYgBTPeslLgaFugCx0PoiBpPIKnyCBEVfqqJCkjsSKpP"
 	twitter = Twython(consumer_key, consumer_secret,access_token,access_token_secret )
 
-	if screen_name == None:
-		tweets = twitter.get_user_timeline(user_id = user_id, count = 200, trim_user = False, include_rts = True  )
-	else:
-		tweets = twitter.get_user_timeline(screen_name = screen_name, count = 200, trim_user = False, include_rts = True  )
+	tweets = None
+	while(tweets == None):
+		try:
+			if screen_name == None:
+				tweets = twitter.get_user_timeline(user_id = user_id, count = 200, trim_user = False, include_rts = True  )
+			else:
+				tweets = twitter.get_user_timeline(screen_name = screen_name, count = 200, trim_user = False, include_rts = True  )
+		except TwythonRateLimitError:
+			warn("Fall asleep")
+			sleep(300)
+			pass
+		except  TwythonAuthError:
+			warn("Bad Authentication")
+			return []
+		except TwythonError:
+			warn("404 not found")
+			return []
 
 	totalTweets = tweets
 	while len(tweets) >= 2:
 		max_id = tweets[-1]["id"]
-		tweets = twitter.get_user_timeline(screen_name = screen_name, max_id = max_id, count = 200, trim_user = False, include_rts = True)
+		try:
+			tweets = twitter.get_user_timeline(screen_name = screen_name, max_id = max_id, count = 200, trim_user = False, include_rts = True)
+		except TwythonRateLimitError:
+			print("Fall asleep")
+			sleep(300)
+			continue
 		if len(tweets) > 1:
 			totalTweets += tweets[1:]
 	return totalTweets

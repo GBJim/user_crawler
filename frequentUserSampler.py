@@ -4,16 +4,14 @@ import operator
 import json
 from twython import Twython
 from twython import TwythonAuthError
-from  twython import TwythonRateLimitError
-from  twython import TwythonError
+from twython import TwythonRateLimitError
+from twython import TwythonError
 import re
 import numpy as np
 import bisect
 import random
 from time import sleep
 from idCrawler import *
-
-
 
 
 def getUserFrequency():
@@ -51,14 +49,7 @@ def writeUsers(tweets, collectionName = "regularUser_en"):
 	collection.insert(tweets)
 	print("{} tweets inserted".format(len(tweets)))
 
-
-
-
-
 randomUsers = loadUsers()
-
-
-
 tweets = []
 i = 0
 times = 0
@@ -71,10 +62,3 @@ for user_id in randomUsers[i:]:
 		if userLangDetect(user_id = user_id, threshold = 0.9):
 			tweets += getTweets(user_id = user_id)
 			times += 1
-	except  TwythonAuthError:
-		print("Bad Authentication")
-	except TwythonRateLimitError:
-		print("Fall sleep")
-		sleep(300)
-	except TwythonError:
-		print("404 not found!")
